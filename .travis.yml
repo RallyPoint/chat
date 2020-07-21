@@ -8,7 +8,7 @@ env:
     - DOCKER_IMAGE="chat"
     - DOCKER_USERNAME=rallypointtech
     - KUBE_NAMESPACE="prod"
-    - CI_ENVIRONMENT_SLUG="back"
+    - CI_ENVIRONMENT_SLUG="chat"
 
 jobs:
   include:
