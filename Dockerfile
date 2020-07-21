@@ -7,3 +7,5 @@ RUN yarn install --quiet
 RUN yarn run build
 
 EXPOSE 3000
+
+CMD [ "./ci/run-prod.sh" ]
