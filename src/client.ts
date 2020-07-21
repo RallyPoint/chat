@@ -18,15 +18,18 @@ export class Client {
     public jwtPayload: any;
 
     constructor(protected readonly socket: Socket,protected readonly server: Server) {
-        if(!socket.handshake.query['auth_token'] || !socket.handshake.query['auth_token']){
+        if(!socket.handshake.query['channel']){
             throw new Error('Invalide params');
+        }
+        if(!socket.handshake.query['auth_token']){
+            socket.join(socket.handshake.query['channel']);
+            return;
         }
         if(!jwt.verify(socket.handshake.query['auth_token'], publicKey,{ algorithms: ['RS256'] })){
             throw new Error('Invalid token');
         }
         this.jwtPayload = jwt.decode(socket.handshake.query['auth_token']);
         this.channel = socket.handshake.query['channel'];
-        console.log("hello");
         socket.join(socket.handshake.query['channel'])
             .on('message',this.onReceive('message', Message).bind(this))
             .on('vote',this.onReceive('vote', Vote).bind(this))
