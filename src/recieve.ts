@@ -4,7 +4,7 @@ export class Recieve{
 
     protected uuid: string;
 
-    constructor(protected message: any,protected userId: string){
+    constructor(protected message: any,protected userId: string,pseudo:string){
         this.uuid = uuid.v4();
     }
 

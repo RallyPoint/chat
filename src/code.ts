@@ -4,8 +4,8 @@ import Axios from "axios";
 export class Code extends Recieve{
 
     private static readonly GITHUB_END_POINT = 'https://api.github.com/';
-    constructor(protected message: any,protected userId: string){
-        super(message,userId );
+    constructor(protected message: any,protected userId: string,protected pseudo:string){
+        super(message,userId,pseudo );
     }
 
     async toSocket(): Promise<any>{
@@ -20,10 +20,11 @@ export class Code extends Recieve{
         },{
             auth:{
                 username: 'franckrst',
-                password: 'dd9e5652ad3d72f7b6070e617d0e7177c4688dc0'
+                password: 'b9f23b9abb5d06baab8d28964ad529db00e50ff1'
             }
         }).then((res) => {
             return {
+                pseudo: this.pseudo,
                 uuid: this.uuid,
                 txt: this.message.txt,
                 by: this.userId,

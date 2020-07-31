@@ -36,7 +36,7 @@ export class Client {
             .on('code',this.onReceive('code', Code).bind(this));
     }
 
-    onReceive(type:string, model:new (message: any, userId: any)=>Recieve){
+    onReceive(type:string, model:new (message: any, userId: string,pseudo:string)=>Recieve){
         return (message)=> {
             const time = Date.now();
             if (this.lastMessage > time - Client.messageDelay) {
@@ -44,7 +44,7 @@ export class Client {
             }
             this.lastMessage = time;
             try {
-                new model(message, this.jwtPayload.userId).toSocket().then((message) => {
+                new model(message, this.jwtPayload.userId,this.jwtPayload.pseudo).toSocket().then((message) => {
                     this.server.io.to(this.channel).emit(type, message);
                 });
             } catch (e) {
@@ -59,8 +59,7 @@ export class Client {
         if(this.lastMessage > time - Client.messageDelay){return;}
         this.lastMessage = time;
         try{
-            console.log(this.channel);
-            this.server.io.to(this.channel).emit("message", new Message(message,this.jwtPayload.userId).toSocket());
+            this.server.io.to(this.channel).emit("message", new Message(message,this.jwtPayload.userId,this.jwtPayload.pseudo).toSocket());
         }catch (e) {
             console.error(e);
         }
@@ -74,7 +73,7 @@ export class Client {
         }
         this.lastMessage = time;
         try{
-            this.server.io.to(this.channel).emit("vote", new Vote(message,this.jwtPayload.userId).toSocket());
+            this.server.io.to(this.channel).emit("vote", new Vote(message,this.jwtPayload.userId,this.jwtPayload.pseudo).toSocket());
         }catch (e) {
         }
     }
