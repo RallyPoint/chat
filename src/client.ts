@@ -21,7 +21,7 @@ export class Client {
         if(!socket.handshake.query['channel']){
             throw new Error('Invalide params');
         }
-        if(!socket.handshake.query['auth_token']){
+        if(!socket.handshake.query['auth_token'] || socket.handshake.query['auth_token'] === "null"){
             socket.join(socket.handshake.query['channel']);
             return;
         }
@@ -38,6 +38,7 @@ export class Client {
 
     onReceive(type:string, model:new (message: any, userId: string,pseudo:string)=>Recieve){
         return (message)=> {
+            console.log("onReceive",message);
             const time = Date.now();
             if (this.lastMessage > time - Client.messageDelay) {
                 return;
