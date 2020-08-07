@@ -1,6 +1,8 @@
 import * as uuid from 'uuid';
 import {Recieve} from "./recieve";
 import Axios from "axios";
+import * as config from 'config';
+
 export class Code extends Recieve{
 
     private static readonly GITHUB_END_POINT = 'https://api.github.com/';
@@ -18,10 +20,7 @@ export class Code extends Recieve{
                 }
             }
         },{
-            auth:{
-                username: 'franckrst',
-                password: 'b9f23b9abb5d06baab8d28964ad529db00e50ff1'
-            }
+            auth:config.get("github")
         }).then((res) => {
             return {
                 pseudo: this.pseudo,
