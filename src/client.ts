@@ -1,6 +1,6 @@
-import {Channel} from "./channel";
 import {Message} from "./message";
 import {Socket} from "socket.io";
+import * as config from "config";
 import * as jwt from "jsonwebtoken";
 import * as fs from "fs";
 import {Server} from "./server";
@@ -8,7 +8,6 @@ import {Vote} from "./vote";
 import {Recieve} from "./recieve";
 import {Code} from "./code";
 
-const publicKey = fs.readFileSync('./ci/cert/local.pub',"utf-8");
 
 export class Client {
 
@@ -25,7 +24,7 @@ export class Client {
             socket.join(socket.handshake.query['channel']);
             return;
         }
-        if(!jwt.verify(socket.handshake.query['auth_token'], publicKey,{ algorithms: ['RS256'] })){
+        if(!jwt.verify(socket.handshake.query['auth_token'], atob(config.get('cert.jwt.public')),{ algorithms: ['RS256'] })){
             throw new Error('Invalid token');
         }
         this.jwtPayload = jwt.decode(socket.handshake.query['auth_token']);
