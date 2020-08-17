@@ -24,7 +24,7 @@ export class Client {
             socket.join(socket.handshake.query['channel']);
             return;
         }
-        if(!jwt.verify(socket.handshake.query['auth_token'], atob(config.get('cert.jwt.public')),{ algorithms: ['RS256'] })){
+        if(!jwt.verify(socket.handshake.query['auth_token'], new Buffer(config.get('cert.jwt.public'), 'base64').toString('binary'),{ algorithms: ['RS256'] })){
             throw new Error('Invalid token');
         }
         this.jwtPayload = jwt.decode(socket.handshake.query['auth_token']);
