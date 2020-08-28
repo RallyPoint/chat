@@ -2,12 +2,19 @@ import * as uuid from 'uuid';
 import {Recieve} from "./recieve";
 import Axios from "axios";
 import * as config from 'config';
+import {Server} from "../server";
 
 export class Code extends Recieve{
 
     private static readonly GITHUB_END_POINT = 'https://api.github.com/';
-    constructor(protected message: any,protected userId: string,protected pseudo:string){
-        super(message,userId,pseudo );
+    constructor(protected socket: Server,
+                protected channel: string,
+                protected message: any,
+                protected userId: string,
+                protected pseudo:string,
+                protected roles:string[]){
+        super(socket, channel, message, userId, pseudo, roles);
+        this.type = "code";
     }
 
     async toSocket(): Promise<any>{
@@ -20,7 +27,7 @@ export class Code extends Recieve{
                 }
             }
         },{
-            auth:config.get("github")
+            auth:config.get("OAuth.gistAuth")
         }).then((res) => {
             return {
                 pseudo: this.pseudo,

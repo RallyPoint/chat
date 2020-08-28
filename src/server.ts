@@ -5,6 +5,8 @@ import {Client} from "./client";
 export class Server{
 
     public io: any;
+    private client : {[index:string]: Set<Socket>} = {};
+
     constructor(express: Express){
         let http = require("http").Server(express);
         this.io = require("socket.io")(http);
@@ -23,5 +25,29 @@ export class Server{
         }catch (e) {
             socket.disconnect(true);
         }
+    }
+
+    addClient(userId: string,channel: string, socket: Socket) {
+        if(!this.client[userId+'-'+channel]){
+            this.client[userId+'-'+channel] = new Set();
+        }
+        this.client[userId+'-'+channel].add(socket);
+        socket.once('disconnect', () => {
+            this.client[userId+'-'+channel].delete(socket);
+            if(this.client[userId+'-'+channel].size === 0){
+                delete this.client[userId+'-'+channel];
+            }
+        });
+    }
+
+    getClient(userId: string, channel: string): Set<Socket>{
+        return this.client[userId+'-'+channel];
+    }
+
+    removeClient(userId: string, channel: string){
+        this.client[userId+'-'+channel].forEach((value)=>{
+            value.disconnect(true);
+        });
+        delete this.client[userId+'-'+channel];
     }
 }
