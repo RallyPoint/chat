@@ -8,8 +8,9 @@ export class Message extends Recieve{
                 protected message: {txt:string},
                 protected userId: string,
                 protected pseudo: string,
-                protected roles:string[]){
-        super(socket, channel, message, userId, pseudo, roles);
+                protected roles:string[],
+                protected color: string){
+        super(socket, channel, message, userId, pseudo, roles, color);
         this.type = "message";
     }
 
@@ -17,6 +18,7 @@ export class Message extends Recieve{
         return {
             uuid: this.uuid,
             pseudo: this.pseudo,
+            color: this.color,
             txt: this.message.txt,
             by: this.userId
         };

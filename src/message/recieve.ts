@@ -11,7 +11,8 @@ export class Recieve{
                 protected message: any,
                 protected userId: string,
                 protected pseudo:string,
-                protected role:string[]){
+                protected role:string[],
+                protected color?:string){
         this.uuid = uuid.v4();
     }
 

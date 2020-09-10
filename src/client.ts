@@ -56,7 +56,7 @@ export class Client {
             });
     }
 
-    onReceive(type:string, model:new (socket: Server, channel: string,message: any, userId: string,pseudo:string, roles: string[])=>Recieve){
+    onReceive(type:string, model:new (socket: Server, channel: string,message: any, userId: string,pseudo:string, roles: string[], color: string)=>Recieve){
         return (message)=> {
             const time = Date.now();
             if (this.lastMessage > time - Client.messageDelay) {
@@ -64,7 +64,7 @@ export class Client {
             }
             this.lastMessage = time;
             try {
-                new model(this.server, this.channel, message, this.jwtPayload.id,this.jwtPayload.pseudo,this.jwtPayload.role)
+                new model(this.server, this.channel, message, this.jwtPayload.id,this.jwtPayload.pseudo,this.jwtPayload.role, this.jwtPayload.color)
                     .process().catch(console.error);
             } catch (e) {
                 console.error(e);
