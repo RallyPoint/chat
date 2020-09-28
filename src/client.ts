@@ -1,13 +1,16 @@
-import {Message} from "./message/message";
+import {Message} from "./message/client/message";
 import {Socket} from "socket.io";
 import * as config from "config";
 import * as jwt from "jsonwebtoken";
 import {Server} from "./server";
-import {Vote} from "./message/vote";
-import {Recieve} from "./message/recieve";
-import {Code} from "./message/code";
-import {Admin} from "./message/admin";
+import {Vote} from "./message/client/vote";
+import {ClientMessage} from "./message/client/client-message";
+import {Code} from "./message/client/code";
+import {Admin} from "./message/client/admin";
 import * as Axios from 'axios';
+import {IClientMessageFactory} from './message/client/client-message-factory.interface';
+import {JwtPayload} from './types';
+import { Subscription } from 'rxjs';
 
 
 export class Client {
@@ -15,7 +18,8 @@ export class Client {
     public static readonly messageDelay : number = 1000*1;
     public channel : string;
     public lastMessage : number;
-    public jwtPayload: any;
+    public jwtPayload: JwtPayload;
+    public subscribtions : Subscription[] = [];
 
     constructor(protected readonly socket: Socket,protected readonly server: Server) {
         if(!socket.handshake.query['channel']){
@@ -34,16 +38,19 @@ export class Client {
         if(!verify){
             throw new Error('Invalid token');
         }
-        this.jwtPayload = jwt.decode(socket.handshake.query['auth_token']);
+        this.jwtPayload = <JwtPayload>jwt.decode(socket.handshake.query['auth_token']);
+        //Check if is banned
         Axios.default.get(config.api.rallypoint.endpoint+'chat-auth/channel/'+socket.handshake.query['channel']+'/user/'+this.jwtPayload.id)
             .catch(()=>{
                 return {data:{status:false}};
             })
             .then((res)=>{
                 if(res.data.status) {
-                    this.jwtPayload = jwt.decode(socket.handshake.query['auth_token']);
                     this.channel = socket.handshake.query['channel'];
                     this.server.addClient(this.jwtPayload.id,this.channel,socket);
+                    this.subscribtions.push(this.server.mqttBridge.getChannelObs(this.channel)
+                        .subscribe((value)=>{
+                    }));
                     socket.join(socket.handshake.query['channel'])
                         .on('message', this.onReceive('message', Message).bind(this))
                         .on('vote', this.onReceive('vote', Vote).bind(this))
@@ -56,7 +63,13 @@ export class Client {
             });
     }
 
-    onReceive(type:string, model:new (socket: Server, channel: string,message: any, userId: string,pseudo:string, roles: string[], color: string)=>Recieve){
+    public destroy(): void{
+        this.subscribtions.forEach((subscribtion)=>{
+            subscribtion.unsubscribe();
+        })
+    }
+
+    onReceive(type: string, model: IClientMessageFactory){
         return (message)=> {
             const time = Date.now();
             if (this.lastMessage > time - Client.messageDelay) {
@@ -64,8 +77,8 @@ export class Client {
             }
             this.lastMessage = time;
             try {
-                new model(this.server, this.channel, message, this.jwtPayload.id,this.jwtPayload.pseudo,this.jwtPayload.role, this.jwtPayload.color)
-                    .process().catch(console.error);
+                new model(this.server, this.channel, message, this.jwtPayload)
+                    .processFromClient().catch(console.error);
             } catch (e) {
                 console.error(e);
             }

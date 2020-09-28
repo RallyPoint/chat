@@ -1,4 +1,3 @@
 #!/bin/bash
-yarn install
-yarn run build
+export NODE_ENV="local-dev"
 exec npm run dev
